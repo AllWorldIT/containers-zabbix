@@ -1,0 +1,94 @@
+# Copyright (c) 2022-2023, AllWorldIT.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
+
+server {
+	listen [::]:443 ipv6only=off ssl http2;
+	server_name @SERVER_NAME@;
+
+	root /var/www/html;
+	index index.php;
+
+	location = /favicon.ico {
+		log_not_found off;
+		access_log off;
+	}
+
+	location = /robots.txt {
+		allow all;
+		log_not_found off;
+		access_log off;
+	}
+
+	location ~* \.(js|css|gif|ico|jpg|jpeg|png|svg|ttf)$ {
+		expires max;
+	}
+	
+	location ~ ^\/app\/ {
+		deny all;
+	}
+	location ~ ^\/conf\/ {
+		deny all;
+	}
+	location ~ ^\/include\/ {
+		deny all;
+	}
+	location ~ ^\/local\/ {
+		deny all;
+	}
+	location ~ ^\/locale\/ {
+		deny all;
+	}
+	location ~ ^\/vendor\/ {
+		deny all;
+	}
+
+	location / {
+		try_files $uri $uri/ /index.php?$args;
+	}
+
+	location ~ [^/]\.php(/|$) {
+		# Mitigation against vulnerabilities in php-fpm, just incase
+		fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+
+		# Make sure document exists
+		if (!-f $document_root$fastcgi_script_name) {
+			return 404;
+		}
+
+		# Mitigate https://httpoxy.org/ vulnerabilities
+		fastcgi_param HTTP_PROXY "";
+
+		# Pass request to php-fpm
+		fastcgi_pass unix:/run/php-fpm.sock;
+		fastcgi_index index.php;
+
+		# Include fastcgi_params settings
+		include fastcgi_params;
+
+		# php-fpm requires the SCRIPT_FILENAME to be set
+		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+
+		fastcgi_param REDIRECT_STATUS 200;
+	}
+
+	ssl_certificate /etc/letsencrypt/live/@CERTBOT_CERT_NAME@/fullchain.pem;
+	ssl_certificate_key /etc/letsencrypt/live/@CERTBOT_CERT_NAME@/privkey.pem;
+}

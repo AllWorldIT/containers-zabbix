@@ -1,0 +1,13 @@
+diff --git a/src/go/cmd/zabbix_web_service/pdf_report_creator.go b/src/go/cmd/zabbix_web_service/pdf_report_creator.go
+index afab41204d..e1f3a2c212 100644
+--- a/src/go/cmd/zabbix_web_service/pdf_report_creator.go
++++ b/src/go/cmd/zabbix_web_service/pdf_report_creator.go
+@@ -101,6 +101,8 @@ func (h *handler) report(w http.ResponseWriter, r *http.Request) {
+ 	}
+ 
+ 	opts := chromedp.DefaultExecAllocatorOptions[:]
++	// NK: Disable sandboxing for containers
++	opts = append(opts, chromedp.Flag("no-sandbox", "1"))
+ 
+ 	if options.IgnoreURLCertErrors == 1 {
+ 		opts = append(opts, chromedp.Flag("ignore-certificate-errors", "1"))

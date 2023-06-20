@@ -1,0 +1,175 @@
+# Copyright (c) 2022-2023, AllWorldIT.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
+
+version: '3.9'
+
+services:
+
+
+
+  zabbix-server:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=server
+      - ZABBIX_DATABASE_TYPE=postgresql
+# NK: overridden by CI ,  testuser , testpassword
+#      - ZABBIX_ADMIN_USERNAME=Admin
+#      - ZABBIX_ADMIN_PASSWORD=admin
+      - ZABBIX_SERVER_WEBSERVICE_URL=http://zabbix-webservice:10053/report
+      - POSTGRES_HOST=postgresql-server
+      - POSTGRES_DATABASE=zabbix
+      - POSTGRES_USER=zabbix
+      - POSTGRES_PASSWORD=zabbix
+    networks:
+      - external
+
+
+
+  zabbix-frontend:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=frontend
+      - ZABBIX_DATABASE_TYPE=postgresql
+      - POSTGRES_HOST=postgresql-server
+      - POSTGRES_DATABASE=zabbix
+      - POSTGRES_USER=zabbix
+      - POSTGRES_PASSWORD=zabbix
+    networks:
+      - external
+
+
+
+  zabbix-webservice:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=webservice
+      - ZABBIX_WEBSERVICE_ALLOWEDIP=172.16.0.0/16,64:ff9b:1:ffff::/48
+    networks:
+      - external
+
+
+
+  zabbix-proxy:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=proxy
+      - ZABBIX_DATABASE_TYPE=postgresql
+      - ZABBIX_HOSTNAME=Zabbix proxy
+      - ZABBIX_PROXY_MODE=active
+      - ZABBIX_SERVER=zabbix-server
+      - POSTGRES_HOST=postgresql-proxy
+      - POSTGRES_DATABASE=zabbix
+      - POSTGRES_USER=zabbix
+      - POSTGRES_PASSWORD=zabbix
+    networks:
+      - external
+
+
+
+  zabbix-proxy2:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=proxy
+      - ZABBIX_DATABASE_TYPE=postgresql
+      - ZABBIX_HOSTNAME=Zabbix proxy2
+      - ZABBIX_PROXY_MODE=passive
+      - ZABBIX_SERVER=zabbix-server
+      - ZABBIX_TLS_PSKIDENTITY=proxytest
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+      - POSTGRES_HOST=postgresql-proxy2
+      - POSTGRES_DATABASE=zabbix2
+      - POSTGRES_USER=zabbix2
+      - POSTGRES_PASSWORD=zabbix2
+    networks:
+      - external
+
+
+
+  zabbix-test-agent-via-proxy:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent
+      - ZABBIX_HOSTNAME=Zabbix test agent via proxy
+      - ZABBIX_AGENT_MODE=active
+      - ZABBIX_SERVER=zabbix-proxy2
+      - ZABBIX_TLS_PSKIDENTITY=agenttest
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+
+
+  zabbix-test-agent2-via-proxy:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent2
+      - ZABBIX_HOSTNAME=Zabbix test agent2 via proxy
+      - ZABBIX_AGENT_MODE=active
+      - ZABBIX_SERVER=zabbix-proxy2
+      - ZABBIX_TLS_PSKIDENTITY=agent2test
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+
+
+  postgresql-server:
+    image: registry.conarx.tech/containers/postgresql
+    environment:
+      - POSTGRES_USER=zabbix
+      - POSTGRES_PASSWORD=zabbix
+      - POSTGRES_DATABASE=zabbix
+    networks:
+      - external
+
+
+  postgresql-proxy:
+    image: registry.conarx.tech/containers/postgresql
+    environment:
+      - POSTGRES_USER=zabbix
+      - POSTGRES_PASSWORD=zabbix
+      - POSTGRES_DATABASE=zabbix
+    networks:
+      - external
+
+
+  postgresql-proxy2:
+    image: registry.conarx.tech/containers/postgresql
+    environment:
+      - POSTGRES_USER=zabbix2
+      - POSTGRES_PASSWORD=zabbix2
+      - POSTGRES_DATABASE=zabbix2
+    networks:
+      - external
+
+
+
+networks:
+  external:
+    driver: bridge
+    enable_ipv6: true

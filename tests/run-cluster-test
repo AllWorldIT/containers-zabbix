@@ -1,0 +1,87 @@
+#!/bin/sh
+# Copyright (c) 2022-2023, AllWorldIT.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
+
+check_tests() {
+	service=$1
+
+	i=900
+	while [ "$i" -gt 0 ]; do
+		i=$((i-1))
+
+		echo "INFO: Waiting for Zabbix tests to pass... ${i}s"
+
+		if docker-compose exec "$service" test -e /PASSED_ZABBIX; then
+			echo "PASSED:   - Tests passed for $service"
+			break
+		fi
+		sleep 1
+	done
+
+	if [ "$i" = 0 ]; then
+		return 1
+	fi
+
+	return
+}
+
+
+
+echo "NOTICE: Starting Zabbix tests"
+
+# Run in background so we can see the output
+docker-compose up --remove-orphans &
+
+# This is run within a very minimal environment, we don't have access to using for i in {180..0} or for ((xxxxxx))
+TESTS_PASSED=yes
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-server; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-webservice; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-proxy; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-proxy2; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-frontend; then
+	TESTS_PASSED=
+fi
+
+
+echo "NOTICE: Shutting down Zabbix"
+docker-compose down --remove-orphans --volumes
+
+
+if [ -z "$TESTS_PASSED" ]; then
+	echo "ERROR: Zabbix tests failed!"
+	exit 1
+fi
+
+echo "ALL ZABBIX TESTS PASSED!"

@@ -1,0 +1,17 @@
+[program:zabbix-agent2]
+command=/usr/local/bin/zabbix_agent2 -f
+
+user=zabbix-agent2
+
+# Set up environment for Zabbix
+environment=
+    LANG=C.UTF-8,
+    LANGUAGE=C.UTF-8,
+    LC_ALL=C.UTF-8,
+    PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
+
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
