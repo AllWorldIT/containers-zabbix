@@ -19,7 +19,7 @@
 # IN THE SOFTWARE.
 
 
-FROM registry.conarx.tech/containers/nginx-php/v3.18 as builder
+FROM registry.conarx.tech/containers/nginx-php/3.18 as builder
 
 ENV ZABBIX_VER=6.4.3
 
@@ -305,13 +305,13 @@ RUN set -eux; \
 
 
 
-FROM registry.conarx.tech/containers/nginx-php/v3.18
+FROM registry.conarx.tech/containers/nginx-php/3.18
 
 
 ARG VERSION_INFO=
 LABEL org.opencontainers.image.authors   "Nigel Kukard <nkukard@conarx.tech>"
-LABEL org.opencontainers.image.version   "v3.18"
-LABEL org.opencontainers.image.base.name "registry.conarx.tech/containers/nginx-php/v3.18"
+LABEL org.opencontainers.image.version   "3.18"
+LABEL org.opencontainers.image.base.name "registry.conarx.tech/containers/nginx-php/3.18"
 
 
 # Copy in built binaries
