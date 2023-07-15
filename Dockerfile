@@ -21,7 +21,7 @@
 
 FROM registry.conarx.tech/containers/nginx-php/edge as builder
 
-ENV ZABBIX_VER=6.4.3
+ENV ZABBIX_VER=6.4.4
 
 
 COPY patches /build/patches
@@ -63,6 +63,10 @@ RUN set -eux; \
 	cd "zabbix-${ZABBIX_VER}"; \
 	true "Patching"; \
 	patch -p1 < ../patches/zabbix-disable-chrome-sandboxing.patch; \
+	patch -p1 < ../patches/zabbix-6.4.4_cgoflags-append-fix.patch; \
+	# Alpine patches
+	patch -p1 < ../patches/fix-msghdr.patch; \
+	patch -p1 < ../patches/ui-services-fix-php-80.patch; \
 	true "Configuring"; \
 	autoreconf -fvi; \
 	# Compiler flags
@@ -70,6 +74,8 @@ RUN set -eux; \
 	export PATH="/usr/lib/ccache/bin:$PATH"; \
 	export LDFLAGS="${LDFLAGS} -Wl,--export-dynamic"; \
 	export GOPATH=/build/go; \
+	# Temporary workaround for https://github.com/mattn/go-sqlite3/issues/1164
+	export CGO_CFLAGS="-D_LARGEFILE64_SOURCE"; \
 	export AGENT_LDFLAGS="${LDFLAGS}"; \
 	\
 	_configure_flags="--disable-static"; \
