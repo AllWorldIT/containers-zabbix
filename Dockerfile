@@ -21,7 +21,7 @@
 
 FROM registry.conarx.tech/containers/nginx-php/3.18 as builder
 
-ENV ZABBIX_VER=6.4.4
+ENV ZABBIX_VER=6.4.6
 
 
 COPY patches /build/patches
