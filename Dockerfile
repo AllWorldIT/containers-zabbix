@@ -21,7 +21,7 @@
 
 FROM registry.conarx.tech/containers/nginx-php/edge as builder
 
-ENV ZABBIX_VER=6.4.6
+ENV ZABBIX_VER=6.4.7
 
 
 COPY patches /build/patches
