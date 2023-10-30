@@ -346,6 +346,13 @@ global \$DB;
 \$IMAGE_FORMAT_DEFAULT = IMAGE_FORMAT_PNG;
 \$DB['DOUBLE_IEEE754'] = 'true';
 EOF
+	if [ -n "$ZABBIX_FRONTEND_SSO_USE_PROXY_HEADERS" ]; then
+		cat <<EOF >> /etc/zabbix/zabbix.conf.php
+
+// SSO overrides
+\$SSO['SETTINGS'] = ['use_proxy_headers' => true];
+EOF
+	fi
 	chown root:www-data /etc/zabbix/zabbix.conf.php
 	chmod 0640 /etc/zabbix/zabbix.conf.php
 
