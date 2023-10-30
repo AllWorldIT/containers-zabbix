@@ -156,6 +156,9 @@ Database credentials if `ZABBIX_DATABASE_TYPE` is set to `mysql`.
 
 Database credentials if `ZABBIX_DATABASE_TYPE` is set to `postgresql` or `timescaledb`.
 
+## ZABBIX_FRONTEND_SSO_USE_PROXY_HEADERS
+Optional. Use Zabbix proxy headers for SSO. Set to `yes` to enable.
+
 
 # Environment Variables - Agent
 
