@@ -32,7 +32,7 @@ if [ "$ZABBIX_MODE" = "server" ]; then
 	database_sql=(schema images data)
 	# TimescaleDB
 	if [ "$ZABBIX_DATABASE_TYPE" = "timescaledb" ]; then
-		database_sql+=(timescaledb)
+		database_sql+=(timescaledb/schema)
 	fi
 
 	ZABBIX_ADMIN_USERNAME=${ZABBIX_ADMIN_USERNAME:-Admin}
