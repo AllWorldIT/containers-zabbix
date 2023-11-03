@@ -351,11 +351,13 @@ if [ "$database_type_zabbix" = "postgresql" ]; then
 	export PGPASSWORD="$POSTGRES_PASSWORD"
 
 	while true; do
-		fdc_notice "Zabbix waiting for PostgreSQL server '$POSTGRES_HOST'..."
+		fdc_test_progress zabbix-frontend "Zabbix waiting for PostgreSQL server '$POSTGRES_HOST'..."
 		if pg_isready -d "$POSTGRES_DATABASE" -h "$POSTGRES_HOST" -U "$POSTGRES_USER"; then
+			userlist=$(echo "SELECT * FROM users;" | psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -v ON_ERROR_STOP=ON 2>&1)
+			echo "$userlist" 2>&1
 			# Wait for database initialization to complete
 			if echo "SELECT * FROM users;" | psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -v ON_ERROR_STOP=ON | grep testuser; then
-				fdc_notice "PostgreSQL server is UP, continuing"
+				fdc_test_progress zabbix-frontend "PostgreSQL server is UP, continuing"
 				break
 			fi
 		fi
@@ -368,11 +370,11 @@ elif [ "$database_type_zabbix" = "mysql" ]; then
 	export MYSQL_PWD="$MYSQL_PASSWORD"
 
 	while true; do
-		fdc_notice "Zabbix waiting for MySQL server '$MYSQL_HOST'..."
+		fdc_test_progress zabbix-frontend "Zabbix waiting for MySQL server '$MYSQL_HOST'..."
 		if mysqladmin ping --host "$MYSQL_HOST" --user "$MYSQL_USER" --silent --connect-timeout=2; then
 			# Wait for database initialization to complete
 			if echo "SELECT * FROM users;" | mysql -h "$MYSQL_HOST" -u "$MYSQL_USER" "$MYSQL_DATABASE" | grep testuser; then
-				fdc_notice "MySQL server is UP, continuing"
+				fdc_test_progress zabbix-frontend "MySQL server is UP, continuing"
 				break
 			fi
 		fi
