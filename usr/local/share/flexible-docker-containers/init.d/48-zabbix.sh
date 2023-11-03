@@ -32,7 +32,7 @@ if [ "$ZABBIX_MODE" = "server" ]; then
 	database_sql=(schema images data)
 	# TimescaleDB
 	if [ "$ZABBIX_DATABASE_TYPE" = "timescaledb" ]; then
-		database_sql+=(timescaledb)
+		database_sql+=(timescaledb/schema)
 	fi
 
 	ZABBIX_ADMIN_USERNAME=${ZABBIX_ADMIN_USERNAME:-Admin}
@@ -395,22 +395,25 @@ if [ "${#database_sql[@]}" -gt 0 ]; then
 		# Check if the domain table exists, if not, create the database
 		if echo "\dt users" | psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -v ON_ERROR_STOP=ON  2>&1 | grep -q 'Did not find any relation'; then
 			fdc_notice "Initializing Zabbix PostgreSQL database"
-			{
-				# TimescaleDB
-				if [ "$ZABBIX_DATABASE_TYPE" = "timescaledb" ]; then
-					echo "CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;"
-				fi
+			# TimescaleDB
+			if [ "$ZABBIX_DATABASE_TYPE" = "timescaledb" ]; then
+				fdc_notice "Enabling Timescaledb for Zabbix PostgreSQL database"
+				echo "CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;" | psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -v ON_ERROR_STOP=ON 2>&1
+			fi
 
-				# Normal PostgreSQL
-				for i in "${database_sql[@]}"; do
-					cat "/usr/local/share/$daemon/$database_type_zabbix/$i.sql"
-				done
-				# Check if we're updating the admin user details
-				if [ -n "$zabbix_admin_password_hashed" ]; then
-					echo "UPDATE users SET username = '$ZABBIX_ADMIN_USERNAME', passwd = '$zabbix_admin_password_hashed' WHERE username = 'Admin';"
-				fi
+			# Normal PostgreSQL
+			for i in "${database_sql[@]}"; do
+				fdc_notice "Loading SQL '$i' into Zabbix PostgreSQL database"
+				psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -v ON_ERROR_STOP=ON 2>&1 < "/usr/local/share/$daemon/$database_type_zabbix/$i.sql"
+			done
+			# Check if we're updating the admin user details
+			if [ -n "$zabbix_admin_password_hashed" ]; then
+				fdc_notice "Setting admin details for Zabbix PostgreSQL database"
+				echo "UPDATE users SET username = '$ZABBIX_ADMIN_USERNAME', passwd = '$zabbix_admin_password_hashed' WHERE username = 'Admin';" | psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -v ON_ERROR_STOP=ON 2>&1
+			else
+				fdc_notice "NOT setting admin details for Zabbix PostgreSQL database"
+			fi
 
-			} | psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -q -v ON_ERROR_STOP=ON
 		fi
 
 		unset PGPASSWORD
