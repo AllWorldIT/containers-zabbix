@@ -392,25 +392,27 @@ if [ "${#database_sql[@]}" -gt 0 ]; then
 			sleep 1
 		done
 
-		# Check if the domain table exists, if not, create the database
-		if echo "\dt users" | psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -v ON_ERROR_STOP=ON  2>&1 | grep -q 'Did not find any relation'; then
-			fdc_notice "Initializing Zabbix PostgreSQL database"
-			{
-				# TimescaleDB
-				if [ "$ZABBIX_DATABASE_TYPE" = "timescaledb" ]; then
-					echo "CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;"
-				fi
+		if [ "$ZABBIX_MODE" = "server" ] || [ "$ZABBIX_MODE" = "proxy" ]; then
+			# Check if the domain table exists, if not, create the database
+			if echo "\dt users" | psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -v ON_ERROR_STOP=ON  2>&1 | grep -q 'Did not find any relation'; then
+				fdc_notice "Initializing Zabbix PostgreSQL database"
+				{
+					# TimescaleDB
+					if [ "$ZABBIX_DATABASE_TYPE" = "timescaledb" ]; then
+						echo "CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;"
+					fi
 
-				# Normal PostgreSQL
-				for i in "${database_sql[@]}"; do
-					cat "/usr/local/share/$daemon/$database_type_zabbix/$i.sql"
-				done
-				# Check if we're updating the admin user details
-				if [ -n "$zabbix_admin_password_hashed" ]; then
-					echo "UPDATE users SET username = '$ZABBIX_ADMIN_USERNAME', passwd = '$zabbix_admin_password_hashed' WHERE username = 'Admin';"
-				fi
+					# Normal PostgreSQL
+					for i in "${database_sql[@]}"; do
+						cat "/usr/local/share/$daemon/$database_type_zabbix/$i.sql"
+					done
+					# Check if we're updating the admin user details
+					if [ -n "$zabbix_admin_password_hashed" ]; then
+						echo "UPDATE users SET username = '$ZABBIX_ADMIN_USERNAME', passwd = '$zabbix_admin_password_hashed' WHERE username = 'Admin';"
+					fi
 
-			} | psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -q -v ON_ERROR_STOP=ON
+				} | psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -q -v ON_ERROR_STOP=ON
+			fi
 		fi
 
 		unset PGPASSWORD
@@ -427,18 +429,20 @@ if [ "${#database_sql[@]}" -gt 0 ]; then
 			sleep 1
 		done
 
-		# Check if the domain table exists, if not, create the database
-		if echo "SHOW CREATE TABLE users;" | mysql -h "$MYSQL_HOST" -u "$MYSQL_USER" "$MYSQL_DATABASE" 2>&1 | grep -q "ERROR 1146.*Table.*doesn't exist"; then
-			fdc_notice "Initializing Zabbix MySQL database"
-			{
-				for i in "${database_sql[@]}"; do
-					cat "/usr/local/share/$daemon/$database_type_zabbix/$i.sql"
-				done
-				# Check if we're updating the admin user details
-				if [ -n "$zabbix_admin_password_hashed" ]; then
-					echo "UPDATE users SET username = '$ZABBIX_ADMIN_USERNAME', passwd = '$zabbix_admin_password_hashed' WHERE username = 'Admin';"
-				fi
-			} | mysql -h "$MYSQL_HOST" -u "$MYSQL_USER" "$MYSQL_DATABASE"
+		if [ "$ZABBIX_MODE" = "server" ] || [ "$ZABBIX_MODE" = "proxy" ]; then
+			# Check if the domain table exists, if not, create the database
+			if echo "SHOW CREATE TABLE users;" | mysql -h "$MYSQL_HOST" -u "$MYSQL_USER" "$MYSQL_DATABASE" 2>&1 | grep -q "ERROR 1146.*Table.*doesn't exist"; then
+				fdc_notice "Initializing Zabbix MySQL database"
+				{
+					for i in "${database_sql[@]}"; do
+						cat "/usr/local/share/$daemon/$database_type_zabbix/$i.sql"
+					done
+					# Check if we're updating the admin user details
+					if [ -n "$zabbix_admin_password_hashed" ]; then
+						echo "UPDATE users SET username = '$ZABBIX_ADMIN_USERNAME', passwd = '$zabbix_admin_password_hashed' WHERE username = 'Admin';"
+					fi
+				} | mysql -h "$MYSQL_HOST" -u "$MYSQL_USER" "$MYSQL_DATABASE"
+			fi
 		fi
 
 		unset MYSQL_PWD
