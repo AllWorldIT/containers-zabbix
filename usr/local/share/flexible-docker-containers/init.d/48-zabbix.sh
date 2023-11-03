@@ -411,7 +411,7 @@ if [ "${#database_sql[@]}" -gt 0 ]; then
 						echo "UPDATE users SET username = '$ZABBIX_ADMIN_USERNAME', passwd = '$zabbix_admin_password_hashed' WHERE username = 'Admin';"
 					fi
 
-				} | psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -q -v ON_ERROR_STOP=ON
+				} | psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -v ON_ERROR_STOP=ON 2>&1
 			fi
 		fi
 
