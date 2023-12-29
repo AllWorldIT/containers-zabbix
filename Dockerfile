@@ -19,7 +19,7 @@
 # IN THE SOFTWARE.
 
 
-FROM registry.conarx.tech/containers/nginx-php/3.18 as builder
+FROM registry.conarx.tech/containers/nginx-php/3.19 as builder
 
 
 # UPDATE timescaledb version in tests/docker-compose.yml.timescaledb.tmpl to the max supported version
@@ -314,13 +314,13 @@ RUN set -eux; \
 
 
 
-FROM registry.conarx.tech/containers/nginx-php/3.18
+FROM registry.conarx.tech/containers/nginx-php/3.19
 
 
 ARG VERSION_INFO=
 LABEL org.opencontainers.image.authors   "Nigel Kukard <nkukard@conarx.tech>"
-LABEL org.opencontainers.image.version   "3.18"
-LABEL org.opencontainers.image.base.name "registry.conarx.tech/containers/nginx-php/3.18"
+LABEL org.opencontainers.image.version   "3.19"
+LABEL org.opencontainers.image.base.name "registry.conarx.tech/containers/nginx-php/3.19"
 
 
 # Copy in built binaries
