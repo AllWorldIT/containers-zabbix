@@ -423,7 +423,7 @@ if [ "${#database_sql[@]}" -gt 0 ]; then
 
 		while true; do
 			fdc_notice "Zabbix waiting for MySQL server '$MYSQL_HOST'..."
-			if mysqladmin ping --host "$MYSQL_HOST" --user "$MYSQL_USER" --silent --connect-timeout=2; then
+			if mariadb-admin ping --host "$MYSQL_HOST" --user "$MYSQL_USER" --silent --connect-timeout=2; then
 				fdc_notice "MySQL server is UP, continuing"
 				break
 			fi
