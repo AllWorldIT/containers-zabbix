@@ -71,7 +71,7 @@ if [ "$ZABBIX_MODE" = "server" ]; then
 			echo "DELETE FROM ids WHERE table_name='interface' AND field_name='interfaceid';"
 			echo "INSERT INTO ids (table_name,field_name,nextid) VALUES ('hosts','hostid',(SELECT MAX(hostid) AS id FROM hosts)+1);"
 			echo "INSERT INTO ids (table_name,field_name,nextid) VALUES ('interface','interfaceid',(SELECT MAX(interfaceid) AS id FROM interface)+1);"
-		) | mysql -h "$MYSQL_HOST" -u "$MYSQL_USER" "$MYSQL_DATABASE"
+		) | mariadb --skip-ssl --host "$MYSQL_HOST" --user "$MYSQL_USER" "$MYSQL_DATABASE"
 
 		unset MYSQL_PWD
 	fi
