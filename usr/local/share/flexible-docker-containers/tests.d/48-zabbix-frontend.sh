@@ -371,9 +371,9 @@ elif [ "$database_type_zabbix" = "mysql" ]; then
 
 	while true; do
 		fdc_test_progress zabbix-frontend "Zabbix waiting for MySQL server '$MYSQL_HOST'..."
-		if mariadb-admin ping --host "$MYSQL_HOST" --user "$MYSQL_USER" --connect-timeout=2; then
+		if mariadb-admin ping --skip-ssl --host "$MYSQL_HOST" --user "$MYSQL_USER" --connect-timeout=2; then
 			# Wait for database initialization to complete
-			if echo "SELECT * FROM users;" | mysql -h "$MYSQL_HOST" -u "$MYSQL_USER" "$MYSQL_DATABASE" | grep testuser; then
+			if echo "SELECT * FROM users;" | mariadb --skip-ssl --host "$MYSQL_HOST" --user "$MYSQL_USER" "$MYSQL_DATABASE" | grep testuser; then
 				fdc_test_progress zabbix-frontend "MySQL server is UP, continuing"
 				break
 			fi
