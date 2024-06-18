@@ -27,7 +27,7 @@ check_tests() {
 	while [ "$i" -gt 0 ]; do
 		i=$((i-1))
 
-		echo "INFO: Waiting for Zabbix tests to pass... ${i}s"
+		echo "INFO: Waiting for Zabbix tests to pass [$service]... ${i}s"
 
 		if docker-compose exec "$service" test -e /PASSED_ZABBIX; then
 			echo "PASSED:   - Tests passed for $service"
@@ -37,6 +37,7 @@ check_tests() {
 	done
 
 	if [ "$i" = 0 ]; then
+		echo "FAILED:   - Tests failed for $service"
 		return 1
 	fi
 
@@ -48,7 +49,7 @@ check_tests() {
 echo "NOTICE: Starting Zabbix tests"
 
 # Run in background so we can see the output
-docker-compose up --remove-orphans &
+docker-compose up --remove-orphans --renew-anon-volumes --force-recreate &
 
 # This is run within a very minimal environment, we don't have access to using for i in {180..0} or for ((xxxxxx))
 TESTS_PASSED=yes
@@ -58,18 +59,142 @@ fi
 if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-webservice; then
 	TESTS_PASSED=
 fi
-if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-proxy; then
+
+
+# Encrypted agent via active non-encrypted proxy1a
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-proxy1a; then
 	TESTS_PASSED=
 fi
-if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-proxy2; then
+
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy1a-a; then
 	TESTS_PASSED=
 fi
-if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy; then
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy1a-a; then
 	TESTS_PASSED=
 fi
-if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy; then
+
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy1a-ae; then
 	TESTS_PASSED=
 fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy1a-ae; then
+	TESTS_PASSED=
+fi
+
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy1a-p; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy1a-p; then
+	TESTS_PASSED=
+fi
+
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy1a-pe; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy1a-pe; then
+	TESTS_PASSED=
+fi
+
+# Encrypted agent via active non-encrypted proxy2ae
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-proxy2ae; then
+	TESTS_PASSED=
+fi
+
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy2ae-a; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy2ae-a; then
+	TESTS_PASSED=
+fi
+
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy2ae-ae; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy2ae-ae; then
+	TESTS_PASSED=
+fi
+
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy2ae-p; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy2ae-p; then
+	TESTS_PASSED=
+fi
+
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy2ae-pe; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy2ae-pe; then
+	TESTS_PASSED=
+fi
+
+
+# Encrypted agent via active non-encrypted proxy3p
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-proxy3p; then
+	TESTS_PASSED=
+fi
+
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy3p-a; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy3p-a; then
+	TESTS_PASSED=
+fi
+
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy3p-ae; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy3p-ae; then
+	TESTS_PASSED=
+fi
+
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy3p-p; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy3p-p; then
+	TESTS_PASSED=
+fi
+
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy3p-pe; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy3p-pe; then
+	TESTS_PASSED=
+fi
+
+# Encrypted agent via active non-encrypted proxy4pe
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-proxy4pe; then
+	TESTS_PASSED=
+fi
+
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy4pe-a; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy4pe-a; then
+	TESTS_PASSED=
+fi
+
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy4pe-ae; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy4pe-ae; then
+	TESTS_PASSED=
+fi
+
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy4pe-p; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy4pe-p; then
+	TESTS_PASSED=
+fi
+
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent-via-proxy4pe-pe; then
+	TESTS_PASSED=
+fi
+if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-test-agent2-via-proxy4pe-pe; then
+	TESTS_PASSED=
+fi
+
+
 if [ -n "$TESTS_PASSED" ] && ! check_tests zabbix-frontend; then
 	TESTS_PASSED=
 fi
