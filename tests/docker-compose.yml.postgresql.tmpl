@@ -19,7 +19,6 @@
 # IN THE SOFTWARE.
 
 
-
 services:
 
 
@@ -57,7 +56,6 @@ services:
       - external
 
 
-
   zabbix-webservice:
     image: @@PIPELINE_IMAGE@@
     environment:
@@ -68,74 +66,505 @@ services:
       - external
 
 
+#
+# PROXIES
+#
 
-  zabbix-proxy:
+# ACTIVE PROXIES
+
+  # Zabbix Proxy 1 - Active - Not Encrypted
+  zabbix-proxy1a:
     image: @@PIPELINE_IMAGE@@
     environment:
       - FDC_CI=postgresql
       - ZABBIX_MODE=proxy
       - ZABBIX_DATABASE_TYPE=postgresql
-      - ZABBIX_HOSTNAME=Zabbix proxy
+      - ZABBIX_HOSTNAME=Zabbix proxy1a
       - ZABBIX_PROXY_MODE=active
       - ZABBIX_SERVER=zabbix-server
-      - POSTGRES_HOST=postgresql-proxy
-      - POSTGRES_DATABASE=zabbix
-      - POSTGRES_USER=zabbix
-      - POSTGRES_PASSWORD=zabbix
+      - POSTGRES_HOST=postgresql-proxy1a
+      - POSTGRES_DATABASE=zabbixproxy1a
+      - POSTGRES_USER=zabbixproxy1a
+      - POSTGRES_PASSWORD=zabbixproxy1a
     networks:
       - external
 
-
-
-  zabbix-proxy2:
+# Zabbix Proxy 2 - Active - Encrypted
+  zabbix-proxy2ae:
     image: @@PIPELINE_IMAGE@@
     environment:
       - FDC_CI=postgresql
       - ZABBIX_MODE=proxy
       - ZABBIX_DATABASE_TYPE=postgresql
-      - ZABBIX_HOSTNAME=Zabbix proxy2
-      - ZABBIX_PROXY_MODE=passive
+      - ZABBIX_HOSTNAME=Zabbix proxy2ae
+      - ZABBIX_PROXY_MODE=active
       - ZABBIX_SERVER=zabbix-server
-      - ZABBIX_TLS_PSKIDENTITY=proxytest
+      - ZABBIX_TLS_PSKIDENTITY=zabbixproxy2ae
       - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
-      - POSTGRES_HOST=postgresql-proxy2
-      - POSTGRES_DATABASE=zabbix2
-      - POSTGRES_USER=zabbix2
-      - POSTGRES_PASSWORD=zabbix2
+      - POSTGRES_HOST=postgresql-proxy2ae
+      - POSTGRES_DATABASE=zabbixproxy2ae
+      - POSTGRES_USER=zabbixproxy2ae
+      - POSTGRES_PASSWORD=zabbixproxy2ae
     networks:
       - external
 
 
+  # Zabbix Proxy 3 - Passive - Not Encrypted
+  zabbix-proxy3p:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=proxy
+      - ZABBIX_DATABASE_TYPE=postgresql
+      - ZABBIX_HOSTNAME=Zabbix proxy3p
+      - ZABBIX_PROXY_MODE=passive
+      - ZABBIX_SERVER=zabbix-server
+      - POSTGRES_HOST=postgresql-proxy3p
+      - POSTGRES_DATABASE=zabbixproxy3p
+      - POSTGRES_USER=zabbixproxy3p
+      - POSTGRES_PASSWORD=zabbixproxy3p
+    networks:
+      - external
 
-  zabbix-test-agent-via-proxy:
+
+  # Zabbix Proxy 4 - Passive - Encrypted
+  zabbix-proxy4pe:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=proxy
+      - ZABBIX_DATABASE_TYPE=postgresql
+      - ZABBIX_HOSTNAME=Zabbix proxy4pe
+      - ZABBIX_PROXY_MODE=passive
+      - ZABBIX_SERVER=zabbix-server
+      - ZABBIX_TLS_PSKIDENTITY=zabbixproxy4pe
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+      - POSTGRES_HOST=postgresql-proxy4pe
+      - POSTGRES_DATABASE=zabbixproxy4pe
+      - POSTGRES_USER=zabbixproxy4pe
+      - POSTGRES_PASSWORD=zabbixproxy4pe
+    networks:
+      - external
+
+
+#
+# AGENTS
+#
+
+
+  # Active Proxy - Not Encrypted
+
+
+  zabbix-test-agent-via-proxy1a-a:
     image: @@PIPELINE_IMAGE@@
     environment:
       - FDC_CI=postgresql
       - ZABBIX_MODE=agent
-      - ZABBIX_HOSTNAME=Zabbix test agent via proxy
+      - ZABBIX_HOSTNAME=Test agent proxy1a-a
       - ZABBIX_AGENT_MODE=active
-      - ZABBIX_SERVER=zabbix-proxy2
-      - ZABBIX_TLS_PSKIDENTITY=agenttest
-      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+      - ZABBIX_SERVER=zabbix-proxy1a
     networks:
       - external
 
-
-
-  zabbix-test-agent2-via-proxy:
+  zabbix-test-agent2-via-proxy1a-a:
     image: @@PIPELINE_IMAGE@@
     environment:
       - FDC_CI=postgresql
       - ZABBIX_MODE=agent2
-      - ZABBIX_HOSTNAME=Zabbix test agent2 via proxy
+      - ZABBIX_HOSTNAME=Test agent2 proxy1a-a
       - ZABBIX_AGENT_MODE=active
-      - ZABBIX_SERVER=zabbix-proxy2
-      - ZABBIX_TLS_PSKIDENTITY=agent2test
+      - ZABBIX_SERVER=zabbix-proxy1a
+    networks:
+      - external
+
+
+  zabbix-test-agent-via-proxy1a-ae:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent
+      - ZABBIX_HOSTNAME=Test agent proxy1a-ae
+      - ZABBIX_AGENT_MODE=active
+      - ZABBIX_SERVER=zabbix-proxy1a
+      - ZABBIX_TLS_PSKIDENTITY=agentproxy1a-ae
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+  zabbix-test-agent2-via-proxy1a-ae:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent2
+      - ZABBIX_HOSTNAME=Test agent2 proxy1a-ae
+      - ZABBIX_AGENT_MODE=active
+      - ZABBIX_SERVER=zabbix-proxy1a
+      - ZABBIX_TLS_PSKIDENTITY=agent2proxy1a-ae
       - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
     networks:
       - external
 
 
+  zabbix-test-agent-via-proxy1a-p:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent
+      - ZABBIX_HOSTNAME=Test agent proxy1a-p
+      - ZABBIX_AGENT_MODE=passive
+      - ZABBIX_SERVER=zabbix-proxy1a
+    networks:
+      - external
+
+  zabbix-test-agent2-via-proxy1a-p:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent2
+      - ZABBIX_HOSTNAME=Test agent2 proxy1a-p
+      - ZABBIX_AGENT_MODE=passive
+      - ZABBIX_SERVER=zabbix-proxy1a
+    networks:
+      - external
+
+
+  zabbix-test-agent-via-proxy1a-pe:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent
+      - ZABBIX_HOSTNAME=Test agent proxy1a-pe
+      - ZABBIX_AGENT_MODE=passive
+      - ZABBIX_SERVER=zabbix-proxy1a
+      - ZABBIX_TLS_PSKIDENTITY=agentproxy1a-pe
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+  zabbix-test-agent2-via-proxy1a-pe:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent2
+      - ZABBIX_HOSTNAME=Test agent2 proxy1a-pe
+      - ZABBIX_AGENT_MODE=passive
+      - ZABBIX_SERVER=zabbix-proxy1a
+      - ZABBIX_TLS_PSKIDENTITY=agent2proxy1a-pe
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+
+  # Active Proxy - Encrypted
+
+
+  zabbix-test-agent-via-proxy2ae-a:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent
+      - ZABBIX_HOSTNAME=Test agent proxy2ae-a
+      - ZABBIX_AGENT_MODE=active
+      - ZABBIX_SERVER=zabbix-proxy2ae
+    networks:
+      - external
+
+  zabbix-test-agent2-via-proxy2ae-a:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent2
+      - ZABBIX_HOSTNAME=Test agent2 proxy2ae-a
+      - ZABBIX_AGENT_MODE=active
+      - ZABBIX_SERVER=zabbix-proxy2ae
+    networks:
+      - external
+
+
+  zabbix-test-agent-via-proxy2ae-ae:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent
+      - ZABBIX_HOSTNAME=Test agent proxy2ae-ae
+      - ZABBIX_AGENT_MODE=active
+      - ZABBIX_SERVER=zabbix-proxy2ae
+      - ZABBIX_TLS_PSKIDENTITY=agentproxy2ae-ae
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+  zabbix-test-agent2-via-proxy2ae-ae:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent2
+      - ZABBIX_HOSTNAME=Test agent2 proxy2ae-ae
+      - ZABBIX_AGENT_MODE=active
+      - ZABBIX_SERVER=zabbix-proxy2ae
+      - ZABBIX_TLS_PSKIDENTITY=agent2proxy2ae-ae
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+
+  zabbix-test-agent-via-proxy2ae-p:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent
+      - ZABBIX_HOSTNAME=Test agent proxy2ae-p
+      - ZABBIX_AGENT_MODE=passive
+      - ZABBIX_SERVER=zabbix-proxy2ae
+    networks:
+      - external
+
+  zabbix-test-agent2-via-proxy2ae-p:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent2
+      - ZABBIX_HOSTNAME=Test agent2 proxy2ae-p
+      - ZABBIX_AGENT_MODE=passive
+      - ZABBIX_SERVER=zabbix-proxy2ae
+    networks:
+      - external
+
+
+  zabbix-test-agent-via-proxy2ae-pe:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent
+      - ZABBIX_HOSTNAME=Test agent proxy2ae-pe
+      - ZABBIX_AGENT_MODE=passive
+      - ZABBIX_SERVER=zabbix-proxy2ae
+      - ZABBIX_TLS_PSKIDENTITY=agentproxy2ae-pe
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+  zabbix-test-agent2-via-proxy2ae-pe:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent2
+      - ZABBIX_HOSTNAME=Test agent2 proxy2ae-pe
+      - ZABBIX_AGENT_MODE=passive
+      - ZABBIX_SERVER=zabbix-proxy2ae
+      - ZABBIX_TLS_PSKIDENTITY=agent2proxy2ae-pe
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+
+  # Passive Proxy - Not Encrypted
+
+
+  zabbix-test-agent-via-proxy3p-a:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent
+      - ZABBIX_HOSTNAME=Test agent proxy3p-a
+      - ZABBIX_AGENT_MODE=active
+      - ZABBIX_SERVER=zabbix-proxy3p
+    networks:
+      - external
+
+  zabbix-test-agent2-via-proxy3p-a:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent2
+      - ZABBIX_HOSTNAME=Test agent2 proxy3p-a
+      - ZABBIX_AGENT_MODE=active
+      - ZABBIX_SERVER=zabbix-proxy3p
+    networks:
+      - external
+
+
+  zabbix-test-agent-via-proxy3p-ae:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent
+      - ZABBIX_HOSTNAME=Test agent proxy3p-ae
+      - ZABBIX_AGENT_MODE=active
+      - ZABBIX_SERVER=zabbix-proxy3p
+      - ZABBIX_TLS_PSKIDENTITY=agentproxy3p-ae
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+  zabbix-test-agent2-via-proxy3p-ae:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent2
+      - ZABBIX_HOSTNAME=Test agent2 proxy3p-ae
+      - ZABBIX_AGENT_MODE=active
+      - ZABBIX_SERVER=zabbix-proxy3p
+      - ZABBIX_TLS_PSKIDENTITY=agent2proxy3p-ae
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+
+  zabbix-test-agent-via-proxy3p-p:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent
+      - ZABBIX_HOSTNAME=Test agent proxy3p-p
+      - ZABBIX_AGENT_MODE=passive
+      - ZABBIX_SERVER=zabbix-proxy3p
+    networks:
+      - external
+
+  zabbix-test-agent2-via-proxy3p-p:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent2
+      - ZABBIX_HOSTNAME=Test agent2 proxy3p-p
+      - ZABBIX_AGENT_MODE=passive
+      - ZABBIX_SERVER=zabbix-proxy3p
+    networks:
+      - external
+
+
+  zabbix-test-agent-via-proxy3p-pe:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent
+      - ZABBIX_HOSTNAME=Test agent proxy3p-pe
+      - ZABBIX_AGENT_MODE=passive
+      - ZABBIX_SERVER=zabbix-proxy3p
+      - ZABBIX_TLS_PSKIDENTITY=agentproxy3p-pe
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+  zabbix-test-agent2-via-proxy3p-pe:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent2
+      - ZABBIX_HOSTNAME=Test agent2 proxy3p-pe
+      - ZABBIX_AGENT_MODE=passive
+      - ZABBIX_SERVER=zabbix-proxy3p
+      - ZABBIX_TLS_PSKIDENTITY=agent2proxy3p-pe
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+
+  # Passive Proxy - Encrypted
+
+
+  zabbix-test-agent-via-proxy4pe-a:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent
+      - ZABBIX_HOSTNAME=Test agent proxy4pe-a
+      - ZABBIX_AGENT_MODE=active
+      - ZABBIX_SERVER=zabbix-proxy4pe
+    networks:
+      - external
+
+  zabbix-test-agent2-via-proxy4pe-a:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent2
+      - ZABBIX_HOSTNAME=Test agent2 proxy4pe-a
+      - ZABBIX_AGENT_MODE=active
+      - ZABBIX_SERVER=zabbix-proxy4pe
+    networks:
+      - external
+
+
+  zabbix-test-agent-via-proxy4pe-ae:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent
+      - ZABBIX_HOSTNAME=Test agent proxy4pe-ae
+      - ZABBIX_AGENT_MODE=active
+      - ZABBIX_SERVER=zabbix-proxy4pe
+      - ZABBIX_TLS_PSKIDENTITY=agentproxy4pe-ae
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+  zabbix-test-agent2-via-proxy4pe-ae:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent2
+      - ZABBIX_HOSTNAME=Test agent2 proxy4pe-ae
+      - ZABBIX_AGENT_MODE=active
+      - ZABBIX_SERVER=zabbix-proxy4pe
+      - ZABBIX_TLS_PSKIDENTITY=agent2proxy4pe-ae
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+
+  zabbix-test-agent-via-proxy4pe-p:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent
+      - ZABBIX_HOSTNAME=Test agent proxy4pe-p
+      - ZABBIX_AGENT_MODE=passive
+      - ZABBIX_SERVER=zabbix-proxy4pe
+    networks:
+      - external
+
+  zabbix-test-agent2-via-proxy4pe-p:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent2
+      - ZABBIX_HOSTNAME=Test agent2 proxy4pe-p
+      - ZABBIX_AGENT_MODE=passive
+      - ZABBIX_SERVER=zabbix-proxy4pe
+    networks:
+      - external
+
+
+  zabbix-test-agent-via-proxy4pe-pe:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent
+      - ZABBIX_HOSTNAME=Test agent proxy4pe-pe
+      - ZABBIX_AGENT_MODE=passive
+      - ZABBIX_SERVER=zabbix-proxy4pe
+      - ZABBIX_TLS_PSKIDENTITY=agentproxy4pe-pe
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+  zabbix-test-agent2-via-proxy4pe-pe:
+    image: @@PIPELINE_IMAGE@@
+    environment:
+      - FDC_CI=postgresql
+      - ZABBIX_MODE=agent2
+      - ZABBIX_HOSTNAME=Test agent2 proxy4pe-pe
+      - ZABBIX_AGENT_MODE=passive
+      - ZABBIX_SERVER=zabbix-proxy4pe
+      - ZABBIX_TLS_PSKIDENTITY=agent2proxy4pe-pe
+      - ZABBIX_TLS_PSKKEY=01234567890abcdef01234567890abcdef
+    networks:
+      - external
+
+
+  # MAIN ZABBIX DATABASE SERVER
 
   postgresql-server:
     image: registry.conarx.tech/containers/postgresql
@@ -146,29 +575,49 @@ services:
     networks:
       - external
 
+  # PROXY DATABASE SERVERS
 
-  postgresql-proxy:
+  postgresql-proxy1a:
     image: registry.conarx.tech/containers/postgresql
     environment:
-      - POSTGRES_USER=zabbix
-      - POSTGRES_PASSWORD=zabbix
-      - POSTGRES_DATABASE=zabbix
+      - POSTGRES_USER=zabbixproxy1a
+      - POSTGRES_PASSWORD=zabbixproxy1a
+      - POSTGRES_DATABASE=zabbixproxy1a
     networks:
       - external
 
-
-  postgresql-proxy2:
+  postgresql-proxy2ae:
     image: registry.conarx.tech/containers/postgresql
     environment:
-      - POSTGRES_USER=zabbix2
-      - POSTGRES_PASSWORD=zabbix2
-      - POSTGRES_DATABASE=zabbix2
+      - POSTGRES_USER=zabbixproxy2ae
+      - POSTGRES_PASSWORD=zabbixproxy2ae
+      - POSTGRES_DATABASE=zabbixproxy2ae
     networks:
       - external
 
+  postgresql-proxy3p:
+    image: registry.conarx.tech/containers/postgresql
+    environment:
+      - POSTGRES_USER=zabbixproxy3p
+      - POSTGRES_PASSWORD=zabbixproxy3p
+      - POSTGRES_DATABASE=zabbixproxy3p
+    networks:
+      - external
+
+  postgresql-proxy4pe:
+    image: registry.conarx.tech/containers/postgresql
+    environment:
+      - POSTGRES_USER=zabbixproxy4pe
+      - POSTGRES_PASSWORD=zabbixproxy4pe
+      - POSTGRES_DATABASE=zabbixproxy4pe
+    networks:
+      - external
 
 
 networks:
   external:
     driver: bridge
     enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 172.16.2.0/26

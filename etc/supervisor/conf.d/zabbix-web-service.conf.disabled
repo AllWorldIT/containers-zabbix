@@ -1,5 +1,5 @@
 [program:zabbix-web-service]
-command=/usr/local/bin/zabbix_web_service -c /etc/zabbix/zabbix_web_service.conf
+command=/opt/zabbix/bin/zabbix_web_service -c /etc/zabbix/zabbix_web_service.conf
 
 user=zabbix-web-service
 
@@ -8,7 +8,7 @@ environment=
     LANG=C.UTF-8,
     LANGUAGE=C.UTF-8,
     LC_ALL=C.UTF-8,
-    PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
+    PATH=/usr/local/bin:/usr/local/sbin:/opt/zabbix/bin:/usr/bin:/usr/sbin:/bin:/sbin
 
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
