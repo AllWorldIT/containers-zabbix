@@ -24,7 +24,19 @@ export ZABBIX_ADMIN_USERNAME=testuser
 export ZABBIX_ADMIN_PASSWORD=testpassword
 
 
-if [ "$ZABBIX_MODE" = "frontend" ]; then
+if [ "$ZABBIX_MODE" = "server" ]; then
+#    echo "DebugLevel=3" >> /etc/zabbix/zabbix_server.conf.d/99-tests.conf
+    echo "CacheUpdateFrequency=1" >> /etc/zabbix/zabbix_server.conf.d/99-tests.conf
+
+elif [ "$ZABBIX_MODE" = "proxy" ]; then
+#    echo "DebugLevel=3" >> /etc/zabbix/zabbix_proxy.conf.d/99-tests.conf
+    true
+
+elif [ "$ZABBIX_MODE" = "agent" ]; then
+#    echo "DebugLevel=5" >> /etc/zabbix/zabbix_agentd.conf.d/99-tests.conf
+    true
+
+elif [ "$ZABBIX_MODE" = "frontend" ]; then
     cat << EOF > /etc/nginx/http.d/99-fdc-ci.conf
 # The CI/CD runner is sometimes slow, so we allow some more time for requests
 proxy_read_timeout 900s;
