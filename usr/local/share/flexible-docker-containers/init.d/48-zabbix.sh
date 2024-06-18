@@ -404,7 +404,7 @@ if [ "${#database_sql[@]}" -gt 0 ]; then
 			# Normal PostgreSQL
 			for i in "${database_sql[@]}"; do
 				fdc_notice "Loading SQL '$i' into Zabbix PostgreSQL database"
-				psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -v ON_ERROR_STOP=ON 2>&1 < "/usr/local/share/$daemon/$database_type_zabbix/$i.sql"
+				psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -v ON_ERROR_STOP=ON 2>&1 < "/opt/zabbix/share/$daemon/$database_type_zabbix/$i.sql"
 			done
 			# Check if we're updating the admin user details
 			if [ -n "$zabbix_admin_password_hashed" ]; then
@@ -423,7 +423,7 @@ if [ "${#database_sql[@]}" -gt 0 ]; then
 
 		while true; do
 			fdc_notice "Zabbix waiting for MySQL server '$MYSQL_HOST'..."
-			if mysqladmin ping --host "$MYSQL_HOST" --user "$MYSQL_USER" --silent --connect-timeout=2; then
+			if mariadb-admin ping --silent --skip-ssl --host "$MYSQL_HOST" --user "$MYSQL_USER" --connect-timeout=2; then
 				fdc_notice "MySQL server is UP, continuing"
 				break
 			fi
@@ -431,17 +431,17 @@ if [ "${#database_sql[@]}" -gt 0 ]; then
 		done
 
 		# Check if the domain table exists, if not, create the database
-		if echo "SHOW CREATE TABLE users;" | mysql -h "$MYSQL_HOST" -u "$MYSQL_USER" "$MYSQL_DATABASE" 2>&1 | grep -q "ERROR 1146.*Table.*doesn't exist"; then
+		if echo "SHOW CREATE TABLE users;" | mariadb --skip-ssl --host "$MYSQL_HOST" --user "$MYSQL_USER" "$MYSQL_DATABASE" 2>&1 | grep -q "ERROR 1146.*Table.*doesn't exist"; then
 			fdc_notice "Initializing Zabbix MySQL database"
 			{
 				for i in "${database_sql[@]}"; do
-					cat "/usr/local/share/$daemon/$database_type_zabbix/$i.sql"
+					cat "/opt/zabbix/share/$daemon/$database_type_zabbix/$i.sql"
 				done
 				# Check if we're updating the admin user details
 				if [ -n "$zabbix_admin_password_hashed" ]; then
 					echo "UPDATE users SET username = '$ZABBIX_ADMIN_USERNAME', passwd = '$zabbix_admin_password_hashed' WHERE username = 'Admin';"
 				fi
-			} | mysql -h "$MYSQL_HOST" -u "$MYSQL_USER" "$MYSQL_DATABASE"
+			} | mariadb --skip-ssl --host "$MYSQL_HOST" --user "$MYSQL_USER" "$MYSQL_DATABASE"
 		fi
 
 		unset MYSQL_PWD

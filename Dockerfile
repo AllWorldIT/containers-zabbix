@@ -25,7 +25,7 @@ FROM registry.conarx.tech/containers/nginx-php/edge as builder
 # UPDATE timescaledb version in tests/docker-compose.yml.timescaledb.tmpl to the max supported version
 # ref https://hub.docker.com/repository/docker/allworldit/postgresql-timescaledb/tags?page=1&ordering=last_updated
 # ref https://github.com/zabbix/zabbix/blob/6e6aa6c5a866e56648410275a936959a5100712c/include/zbx_dbversion_constants.h#L62
-ENV ZABBIX_VER=6.4.14
+ENV ZABBIX_VER=7.0.0
 
 
 COPY patches /build/patches
@@ -36,12 +36,14 @@ RUN set -eux; \
 # from https://git.alpinelinux.org/aports/tree/community/zabbix/APKBUILD
 	apk add --no-cache \
 		build-base \
+		wget \
 		autoconf \
 		automake \
 		ccache \
 		curl-dev \
 		go \
 		libevent-dev \
+		linux-headers \
 		libpq-dev \
 		libssh2-dev \
 		libxml2-dev \
@@ -83,11 +85,11 @@ RUN set -eux; \
 	export AGENT_LDFLAGS="${LDFLAGS}"; \
 	\
 	_configure_flags="--disable-static"; \
-	_configure_flags="$_configure_flags --prefix=/usr/local"; \
+	_configure_flags="$_configure_flags --prefix=/opt/zabbix"; \
 	_configure_flags="$_configure_flags --sysconfdir=/etc/zabbix"; \
 	_configure_flags="$_configure_flags --datadir=/var/lib/zabbix"; \
-	_configure_flags="$_configure_flags --mandir=/usr/local/share/man"; \
-	_configure_flags="$_configure_flags --infodir=/usr/local/share/info"; \
+	_configure_flags="$_configure_flags --mandir=/opt/zabbix/share/man"; \
+	_configure_flags="$_configure_flags --infodir=/opt/zabbix/share/info"; \
 	_configure_flags="$_configure_flags --enable-agent"; \
 	_configure_flags="$_configure_flags --enable-agent2"; \
 	_configure_flags="$_configure_flags --enable-ipv6"; \
@@ -106,7 +108,7 @@ RUN set -eux; \
 	for db in postgresql mysql; do \
 		./configure $_configure_flags --enable-server "--with-$db"; \
 		make clean; \
-		make -j$(nprocs); \
+		make $MAKEFLAGS; \
 		make dbschema; \
 		mv src/zabbix_server/zabbix_server "src/zabbix_server/zabbix_server_$db"; \
 		mkdir -p "../schema/zabbix-server"; \
@@ -117,7 +119,7 @@ RUN set -eux; \
 	for db in postgresql mysql sqlite3; do \
 		./configure $_configure_flags --enable-proxy "--with-$db"; \
 		make clean; \
-		make -j$(nprocs); \
+		make $MAKEFLAGS; \
 		make dbschema; \
 		mv src/zabbix_proxy/zabbix_proxy "src/zabbix_proxy/zabbix_proxy_$db"; \
 		mkdir -p "../schema/zabbix-proxy"; \
@@ -135,11 +137,11 @@ RUN set -eux; \
 	\
 	true "Install Zabbix server"; \
 	for db in postgresql mysql; do \
-		install -Dm755 "src/zabbix_server/zabbix_server_$db" "$pkgdir/usr/local/bin/zabbix_server_$db"; \
-		mkdir -p "$pkgdir/usr/local/share/zabbix-server"; \
-		cp -vr "../schema/zabbix-server/$db" "$pkgdir/usr/local/share/zabbix-server/$db"; \
+		install -Dm755 "src/zabbix_server/zabbix_server_$db" "$pkgdir/opt/zabbix/bin/zabbix_server_$db"; \
+		mkdir -p "$pkgdir/opt/zabbix/share/zabbix-server"; \
+		cp -vr "../schema/zabbix-server/$db" "$pkgdir/opt/zabbix/share/zabbix-server/$db"; \
 	done; \
-	install -Dm755 src/zabbix_get/zabbix_get "$pkgdir/usr/local/bin/zabbix_get"; \
+	install -Dm755 src/zabbix_get/zabbix_get "$pkgdir/opt/zabbix/bin/zabbix_get"; \
 	install -Dm644 conf/zabbix_server.conf "$pkgdir/etc/zabbix/zabbix_server.conf"; \
 	install -dm755 "$pkgdir/etc/zabbix/zabbix_server.conf.d"; \
 	install -dm755 "$pkgdir/var/tmp/zabbix-server"; \
@@ -150,29 +152,29 @@ RUN set -eux; \
 	\
 	true "Install Zabbix proxy"; \
 	for db in postgresql mysql sqlite3; do \
-		install -Dm755 "src/zabbix_proxy/zabbix_proxy_$db" "$pkgdir/usr/local/bin/zabbix_proxy_$db"; \
-		mkdir -p "$pkgdir/usr/local/share/zabbix-proxy"; \
-		cp -vr "../schema/zabbix-proxy/$db" "$pkgdir/usr/local/share/zabbix-proxy/$db"; \
+		install -Dm755 "src/zabbix_proxy/zabbix_proxy_$db" "$pkgdir/opt/zabbix/bin/zabbix_proxy_$db"; \
+		mkdir -p "$pkgdir/opt/zabbix/share/zabbix-proxy"; \
+		cp -vr "../schema/zabbix-proxy/$db" "$pkgdir/opt/zabbix/share/zabbix-proxy/$db"; \
 	done; \
 	install -Dm644 conf/zabbix_proxy.conf "$pkgdir/etc/zabbix/zabbix_proxy.conf"; \
 	install -dm755 "$pkgdir/etc/zabbix/zabbix_proxy.conf.d"; \
 	\
 	\
 	true "Install Zabbix agent"; \
-	install -Dm755 src/zabbix_agent/zabbix_agentd "$pkgdir/usr/local/bin/zabbix_agentd"; \
-	install -Dm755 src/zabbix_sender/zabbix_sender "$pkgdir/usr/local/bin/zabbix_sender"; \
+	install -Dm755 src/zabbix_agent/zabbix_agentd "$pkgdir/opt/zabbix/bin/zabbix_agentd"; \
+	install -Dm755 src/zabbix_sender/zabbix_sender "$pkgdir/opt/zabbix/bin/zabbix_sender"; \
 	install -Dm644 conf/zabbix_agentd.conf "$pkgdir/etc/zabbix/zabbix_agentd.conf"; \
 	install -dm755 "$pkgdir/etc/zabbix/zabbix_agentd.conf.d"; \
 	\
 	\
 	true "Install Zabbix agent2"; \
-	install -Dm755 src/go/bin/zabbix_agent2 "$pkgdir/usr/local/bin/zabbix_agent2"; \
+	install -Dm755 src/go/bin/zabbix_agent2 "$pkgdir/opt/zabbix/bin/zabbix_agent2"; \
 	install -Dm644 src/go/conf/zabbix_agent2.conf "$pkgdir/etc/zabbix/zabbix_agent2.conf"; \
 	install -dm755 "$pkgdir/etc/zabbix/zabbix_agent2.conf.d/plugins.d"; \
 	\
 	\
 	true "Install Zabbix web service"; \
-	install -Dm755 src/go/bin/zabbix_web_service "$pkgdir/usr/local/bin/zabbix_web_service"; \
+	install -Dm755 src/go/bin/zabbix_web_service "$pkgdir/opt/zabbix/bin/zabbix_web_service"; \
 	install -Dm644 src/go/conf/zabbix_web_service.conf "$pkgdir/etc/zabbix/zabbix_web_service.conf"; \
 	\
 	\
