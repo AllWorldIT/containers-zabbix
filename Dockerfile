@@ -25,7 +25,7 @@ FROM registry.conarx.tech/containers/nginx-php/3.20 as builder
 # UPDATE timescaledb version in tests/docker-compose.yml.timescaledb.tmpl to the max supported version
 # ref https://hub.docker.com/repository/docker/allworldit/postgresql-timescaledb/tags?page=1&ordering=last_updated
 # ref https://github.com/zabbix/zabbix/blob/6e6aa6c5a866e56648410275a936959a5100712c/include/zbx_dbversion_constants.h#L62
-ENV ZABBIX_VER=7.0.1
+ENV ZABBIX_VER=7.0.2
 
 
 COPY patches /build/patches
