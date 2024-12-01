@@ -25,7 +25,7 @@ FROM registry.conarx.tech/containers/nginx-php/edge as builder
 # UPDATE timescaledb version in tests/docker-compose.yml.timescaledb.tmpl to the max supported version
 # ref https://hub.docker.com/repository/docker/allworldit/postgresql-timescaledb/tags?page=1&ordering=last_updated
 # ref https://github.com/zabbix/zabbix/blob/6e6aa6c5a866e56648410275a936959a5100712c/include/zbx_dbversion_constants.h#L62
-ENV ZABBIX_VER=7.0.5
+ENV ZABBIX_VER=7.0.6
 
 
 COPY patches /build/patches
@@ -60,7 +60,7 @@ RUN set -eux; \
 RUN set -eux; \
 	mkdir -p build; \
 	cd build; \
-	wget "https://github.com/zabbix/zabbix/archive/${ZABBIX_VER}.tar.gz" -O "zabbix-server-${ZABBIX_VER}.tar.gz"; \
+	wget "https://cdn.zabbix.com/zabbix/sources/stable/${ZABBIX_VER%.*}/zabbix-${ZABBIX_VER}.tar.gz" -O "zabbix-server-${ZABBIX_VER}.tar.gz"; \
 	tar -zxvf "zabbix-server-${ZABBIX_VER}.tar.gz"
 
 # Download and build
@@ -108,7 +108,6 @@ RUN set -eux; \
 		./configure $_configure_flags --enable-server "--with-$db"; \
 		make clean; \
 		make $MAKEFLAGS; \
-		make dbschema; \
 		mv src/zabbix_server/zabbix_server "src/zabbix_server/zabbix_server_$db"; \
 		mkdir -p "../schema/zabbix-server"; \
 		cp -r "database/$db" "../schema/zabbix-server/$db"; \
@@ -119,7 +118,6 @@ RUN set -eux; \
 		./configure $_configure_flags --enable-proxy "--with-$db"; \
 		make clean; \
 		make $MAKEFLAGS; \
-		make dbschema; \
 		mv src/zabbix_proxy/zabbix_proxy "src/zabbix_proxy/zabbix_proxy_$db"; \
 		mkdir -p "../schema/zabbix-proxy"; \
 		cp -r "database/$db" "../schema/zabbix-proxy/$db"; \
