@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2022-2023, AllWorldIT.
+# Copyright (c) 2022-2025, AllWorldIT.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to
@@ -423,7 +423,7 @@ if [ "${#database_sql[@]}" -gt 0 ]; then
 
 		while true; do
 			fdc_notice "Zabbix waiting for MySQL server '$MYSQL_HOST'..."
-			if mysqladmin ping --host "$MYSQL_HOST" --user "$MYSQL_USER" --silent --connect-timeout=2; then
+			if mariadb-admin ping --silent --skip-ssl --host "$MYSQL_HOST" --user "$MYSQL_USER" --connect-timeout=2; then
 				fdc_notice "MySQL server is UP, continuing"
 				break
 			fi
