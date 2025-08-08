@@ -393,7 +393,7 @@ if [ "${#database_sql[@]}" -gt 0 ]; then
 		done
 
 		# Check if the domain table exists, if not, create the database
-		if ! echo "SELECT COUNT(*) FROM users;" | psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -v ON_ERROR_STOP=ON; then
+		if ! echo "SELECT COUNT(*) FROM users;" | psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -w "$POSTGRES_DATABASE" -v ON_ERROR_STOP=ON > /dev/null 2>&1; then
 			fdc_notice "Initializing Zabbix PostgreSQL database"
 			# TimescaleDB
 			if [ "$ZABBIX_DATABASE_TYPE" = "timescaledb" ]; then
