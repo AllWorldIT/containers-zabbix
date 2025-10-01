@@ -71,6 +71,8 @@ RUN set -eux; \
 	patch -p1 < ../patches/zabbix-disable-chrome-sandboxing.patch; \
 	# Alpine patches
 	patch -p1 < ../patches/ui-services-fix-php-80.patch; \
+	# SAML2 patches
+	patch -p1 < ../patches/zabbix-6.4.14_saml2-authn-fix.patch; \
 	true "Configuring"; \
 	autoreconf -fvi; \
 	# Compiler flags
