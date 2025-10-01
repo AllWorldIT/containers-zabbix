@@ -1,0 +1,12 @@
+diff -ru zabbix-6.4.14_vanilla/ui/vendor/onelogin/php-saml/src/Saml2/AuthnRequest.php zabbix-6.4.14_saml2-authn-fix/ui/vendor/onelogin/php-saml/src/Saml2/AuthnRequest.php
+--- zabbix-6.4.14_vanilla/ui/vendor/onelogin/php-saml/src/Saml2/AuthnRequest.php	2024-04-22 08:11:48.044882096 +0000
++++ zabbix-6.4.14_saml2-authn-fix/ui/vendor/onelogin/php-saml/src/Saml2/AuthnRequest.php	2025-10-01 14:58:33.914899100 +0000
+@@ -135,7 +135,7 @@
+                 $requestedAuthnStr = <<<REQUESTEDAUTHN
+ 
+     <samlp:RequestedAuthnContext $authnComparisonAttr>
+-        <saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</saml:AuthnContextClassRef>
++        <saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified</saml:AuthnContextClassRef>
+     </samlp:RequestedAuthnContext>
+ REQUESTEDAUTHN;
+             } else {
