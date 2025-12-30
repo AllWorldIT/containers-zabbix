@@ -337,6 +337,8 @@ RUN set -eux; \
 		jq \
 		mariadb-client \
 		mariadb-connector-c \
+		# NK: Results in making sure libpq is at the same version as used to build zabbix
+		libpq \
 		postgresql-client \
 		openssl \
 		libevent \
