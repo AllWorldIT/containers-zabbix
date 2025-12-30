@@ -270,17 +270,17 @@ if [ "$ZABBIX_MODE" = "server" ] || [ "$ZABBIX_MODE" = "proxy" ]; then
 	# SSH is a bit particular about permissions, but we'll try 0640 for now until we have a problem
 	chown "root:$daemon" /var/lib/zabbix/sshkeys
 	chmod 0750 /var/lib/zabbix/sshkeys
-	find /var/lib/zabbix/sshkeys -type f -name "id_*" -print0 | xargs -r chown "root:$daemon" || : > /dev/null 2>&1
-	find /var/lib/zabbix/sshkeys -type f -name "id_*" -print0 | xargs -r chmod 0640 || : > /dev/null 2>&1
-	find /var/lib/zabbix/sshkeys -type f -name "*.pub" -print0 | xargs -r chown "root:$daemon" || : > /dev/null 2>&1
-	find /var/lib/zabbix/sshkeys -type f -name "*.pub" -print0 | xargs -r chmod 0640 || : > /dev/null 2>&1
+	find /var/lib/zabbix/sshkeys -type f -name "id_*" -print0 | xargs -0 -r chown "root:$daemon" || : > /dev/null 2>&1
+	find /var/lib/zabbix/sshkeys -type f -name "id_*" -print0 | xargs -0 -r chmod 0640 || : > /dev/null 2>&1
+	find /var/lib/zabbix/sshkeys -type f -name "*.pub" -print0 | xargs -0 -r chown "root:$daemon" || : > /dev/null 2>&1
+	find /var/lib/zabbix/sshkeys -type f -name "*.pub" -print0 | xargs -0 -r chmod 0640 || : > /dev/null 2>&1
 
 	chown root:root /var/lib/zabbix/alertscripts
-	find /var/lib/zabbix/alertscripts -type f -print0 | xargs -r chmod 0755 || : > /dev/null 2>&1
+	find /var/lib/zabbix/alertscripts -type f -print0 | xargs -0 -r chmod 0755 || : > /dev/null 2>&1
 	chmod 0755 /var/lib/zabbix/alertscripts
 
 	chown root:root /var/lib/zabbix/externalscripts
-	find /var/lib/zabbix/externalscripts -type f -print0 | xargs -r chmod 0755 || : > /dev/null 2>&1
+	find /var/lib/zabbix/externalscripts -type f -print0 | xargs -0 -r chmod 0755 || : > /dev/null 2>&1
 	chmod 0755 /var/lib/zabbix/externalscripts
 
 	# Enable the relevant daemon
